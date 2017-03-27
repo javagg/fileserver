@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,6 +28,7 @@ namespace WebApplication1
             {
                 using (var stream = new FileStream(Path.Combine(uploads, file.FileName), FileMode.Create))
                     await file.CopyToAsync(stream);
+                Console.WriteLine($"[{DateTime.Now}] {file.FileName} saved!");
             }
             return new OkObjectResult("uploaded!");
         }
