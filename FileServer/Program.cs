@@ -8,22 +8,23 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using Microsoft.Extensions.FileProviders;
 
 namespace WebApplication1
 {
     public class HomeController : Controller
     {
         private readonly IHostingEnvironment environment;
-
+        private IEnumerable<string> aa;
         public HomeController(IHostingEnvironment environment) => this.environment = environment;
 
-        public IActionResult Index() => new OkObjectResult("It works!");
+       public IActionResult Index() => new OkObjectResult("It works!");
 
         [HttpPost]
         public async Task<IActionResult> Index(IFormFile file)
         {
-            var uploads = Path.Combine(environment.WebRootPath, "uploads");
-            Directory.CreateDirectory(uploads);
+            var uploads = Path.Combine(environment.ContentRootPath, "wwwroot");
             if (file.Length > 0)
             {
                 using (var stream = new FileStream(Path.Combine(uploads, file.FileName), FileMode.Create))
@@ -46,11 +47,18 @@ namespace WebApplication1
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDirectoryBrowser();
             services.AddMvc();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            app.UseStaticFiles();
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "wwwroot")),
+                EnableDirectoryBrowsing = true
+            });
             app.UseMvcWithDefaultRoute();
         }
     }
